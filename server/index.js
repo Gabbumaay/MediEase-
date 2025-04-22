@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const app = require("./app");
 
 //port
-const port = process.env.PORT || 4000;
+const port = process.env.PORT;
 
 //routes
 const purchaseRoutes = require("./src/routes/purchaseRoutes.js");
