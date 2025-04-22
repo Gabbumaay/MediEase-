@@ -1,6 +1,6 @@
- // const baseUrl = import.meta.env.VITE_API_URL;
+ const baseUrl = import.meta.env.VITE_API_URL;
 // const baseUrl = "http://localhost:4000/api" 
-const baseUrl = "https://medi-ease-server.vercel.app/api"
+// const baseUrl = "https://medi-ease-server.vercel.app/api"
 export const apiRoutes = {
   baseUrl,
   purchase: `${baseUrl}/purchase`,
