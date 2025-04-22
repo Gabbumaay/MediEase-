@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
+const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 const app = express();
 
 app.use(express.json());
