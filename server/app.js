@@ -11,7 +11,7 @@ app.use(cookieParser());
 
 //TODO: Change the origin to deployed frontend URL
 app.use(cors({
-    origin: "https://medi-ease-t18w.vercel.app/",
+    origin: "https://medi-ease-t18w.vercel.app",
     credentials: true
 }));
 
