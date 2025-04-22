@@ -1,5 +1,4 @@
-// const baseUrl = import.meta.env.VITE_API_URL;
-const baseUrl = "https://medi-ease-server.vercel.app:4000/api"
+ const baseUrl = import.meta.env.VITE_API_URL;
 // const baseUrl = "http://localhost:4000/api" 
 
 export const apiRoutes = {
