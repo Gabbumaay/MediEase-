@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-
+const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
 const app = express();
 
 app.use(express.json());
@@ -11,7 +11,7 @@ app.use(cookieParser());
 
 //TODO: Change the origin to deployed frontend URL
 app.use(cors({
-    origin: "https://medi-ease-t18w.vercel.app",
+    origin: allowedOrigin,
     credentials: true
 }));
 
