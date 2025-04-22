@@ -12,6 +12,8 @@ app.use(cookieParser());
 //TODO: Change the origin to deployed frontend URL
 app.use(cors({
     origin: allowedOrigin,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
 
