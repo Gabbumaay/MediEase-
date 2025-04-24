@@ -11,7 +11,13 @@ app.use(cookieParser());
 
 //TODO: Change the origin to deployed frontend URL
 app.use(cors({
-    origin: allowedOrigin, 'https://medi-ease-client.vercel.app',
+    origin: function(origin, callback) {
+        if (!origin || [allowedOrigin, 'https://medi-ease-client.vercel.app'].indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
