@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,9 +8,9 @@ datasource db {
 }
 
 model User {
-  id     String   @id @default(uuid())
-  email  String   @unique
-  name   String
+  id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email  String   @unique @db.VarChar
+  name   String   @db.VarChar
   role   UserRole
   status Status   @default(ACTIVE)
 
@@ -24,44 +18,37 @@ model User {
 }
 
 model Requests {
-  id    String   @id @default(uuid())
-  email String   @unique
-  name  String
+  id    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email String   @unique @db.VarChar
+  name  String   @db.VarChar
   role  UserRole
 
   @@map("requests")
 }
 
-model Verification {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  otp        String
-  expiryTime DateTime
-}
-
 model Medicine {
-  id              String            @id @default(uuid())
-  brandName       String
-  saltName        String
-  categoryId      String
-  Stock           Stock[]
-  Purchases       Purchase[]
-  CheckupMedicine CheckupMedicine[]
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  brandName       String            @db.VarChar
+  saltName        String            @db.VarChar
+  categoryId      String            @db.Uuid
   status          Status            @default(ACTIVE)
-  Category        Category          @relation(fields: [categoryId], references: [id])
+  CheckupMedicine CheckupMedicine[]
+  Category        Category          @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Purchases       Purchase[]
+  Stock           Stock[]
 
   @@map("medicine")
 }
 
 model Supplier {
-  id           String         @id @default(uuid())
-  name         String
-  address      String
-  city         String?
-  state        String
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String         @db.VarChar
+  address      String         @db.VarChar
+  city         String?        @db.VarChar
+  state        String         @db.VarChar
   pinCode      Int?
-  mobileNumber String         @unique
-  email        String?
+  mobileNumber String         @unique @db.VarChar
+  email        String?        @db.VarChar
   status       Status         @default(ACTIVE)
   PurchaseList PurchaseList[]
 
@@ -69,13 +56,13 @@ model Supplier {
 }
 
 model Staff {
-  id             String     @id @default(uuid())
-  name           String
-  email          String     @unique
-  mobileNumber   String?
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String     @db.VarChar
+  email          String     @unique @db.VarChar
+  mobileNumber   String?    @db.VarChar
   role           Role
-  department     String?
-  speciality     String?
+  department     String?    @db.VarChar
+  speciality     String?    @db.VarChar
   gender         Gender
   status         Status     @default(ACTIVE)
   DoctorCheckups Checkup[]  @relation("DoctorCheckups")
@@ -86,44 +73,42 @@ model Staff {
 }
 
 model Schedule {
-  id      String @id @default(uuid())
-  staffId String
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  staffId String @db.Uuid
   shift   Shift
   day     Day
-
-  Staff Staff @relation(fields: [staffId], references: [id])
+  Staff   Staff  @relation(fields: [staffId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("schedule")
 }
 
 model Stock {
-  id          String   @id @default(uuid())
-  medicineId  String
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  medicineId  String   @db.Uuid
   stock       Int
   inQuantity  Int
   outQuantity Int
-  Medicine    Medicine @relation(fields: [medicineId], references: [id])
+  Medicine    Medicine @relation(fields: [medicineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("stock")
 }
 
 model PurchaseList {
-  id           String   @id @default(uuid())
-  supplierId   String
-  purchaseDate DateTime
-  invoiceNo    BigInt   @unique
-  Details      String?
-
-  Supplier Supplier   @relation(fields: [supplierId], references: [id])
-  Purchase Purchase[]
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  supplierId   String     @db.Uuid
+  purchaseDate DateTime   @db.Timestamp(6)
+  invoiceNo    BigInt     @unique
+  Details      String?    @db.VarChar
+  Purchase     Purchase[]
+  Supplier     Supplier   @relation(fields: [supplierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("purchaseList")
 }
 
 model Category {
-  id           String     @id @default(uuid())
-  categoryName String
-  strengthType String
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categoryName String     @db.VarChar
+  strengthType String     @db.VarChar
   status       Status     @default(ACTIVE)
   Medicine     Medicine[]
 
@@ -131,123 +116,139 @@ model Category {
 }
 
 model Purchase {
-  id             String    @id @default(uuid())
-  purchaseListId String
-  medicineId     String
-  mfgDate        DateTime?
-  expiryDate     DateTime
-  batchNo        BigInt    @unique
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  purchaseListId String       @db.Uuid
+  medicineId     String       @db.Uuid
+  mfgDate        DateTime?    @db.Timestamp(6)
+  expiryDate     DateTime     @db.Timestamp(6)
+  batchNo        BigInt       @unique
   quantity       Int
-
-  Medicine     Medicine     @relation(fields: [medicineId], references: [id])
-  PurchaseList PurchaseList @relation(fields: [purchaseListId], references: [id])
+  Medicine       Medicine     @relation(fields: [medicineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  PurchaseList   PurchaseList @relation(fields: [purchaseListId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("purchase")
 }
 
 model Patient {
-  id                 String          @id @default(uuid())
-  name               String
+  id                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String          @db.VarChar
   department         Department?
   age                Int
-  email              String          @unique
-  bloodGroup         String
+  email              String          @unique @db.VarChar
+  bloodGroup         String          @db.VarChar
   program            Program?
-  fatherOrSpouseName String?
+  fatherOrSpouseName String?         @db.VarChar
   category           PatientCategory
   gender             Gender
-  allergy            String?
-  Checkup            Checkup[]
+  allergy            String?         @db.VarChar
   status             Status          @default(ACTIVE)
+  Checkup            Checkup[]
   PatientVitals      PatientVitals[]
 
   @@map("patient")
 }
 
 model Checkup {
-  id               String   @id @default(uuid())
-  patientId        String
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  patientId        String            @db.Uuid
   temperature      Float?
-  date             DateTime
+  date             DateTime          @db.Timestamp(6)
   spO2             Float?
   pulseRate        Int?
-  bloodPressure    String?
-  symptoms         String?
-  diagnosis        String
-  referredDoctor   String?
-  referredHospital String?
-  doctorId         String?
-  staffId          String
-
-  Patient Patient @relation(fields: [patientId], references: [id])
-
-  Doctor Staff? @relation("DoctorCheckups", fields: [doctorId], references: [id])
-  Staff  Staff  @relation("StaffCheckups", fields: [staffId], references: [id])
-
-  CheckupMedicine CheckupMedicine[]
+  bloodPressure    String?           @db.VarChar
+  symptoms         String?           @db.VarChar
+  diagnosis        String            @db.VarChar
+  referredDoctor   String?           @db.VarChar
+  referredHospital String?           @db.VarChar
+  doctorId         String?           @db.Uuid
+  staffId          String            @db.Uuid
+  Doctor           Staff?            @relation("DoctorCheckups", fields: [doctorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Patient          Patient           @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Staff            Staff             @relation("StaffCheckups", fields: [staffId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  CheckupMedicine  CheckupMedicine[]
 
   @@map("checkup")
 }
 
 model PatientVitals {
-  id            String   @id @default(uuid())
-  patientId     String
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  patientId     String   @db.Uuid
   temperature   Float?
-  date          DateTime
-  bloodPressure String?
+  date          DateTime @db.Timestamp(6)
+  bloodPressure String?  @db.VarChar
   pulseRate     Int?
   spO2          Float?
-
-  Patient Patient @relation(fields: [patientId], references: [id])
+  Patient       Patient  @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("patient_vitals")
 }
 
 model CheckupMedicine {
-  id         String  @id @default(uuid())
-  medicineId String
-  dosage     String?
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  medicineId String   @db.Uuid
+  dosage     String?  @db.VarChar
   quantity   Int
-  checkupId  String
-
-  Medicine Medicine @relation(fields: [medicineId], references: [id])
-  Checkup  Checkup  @relation(fields: [checkupId], references: [id])
+  checkupId  String   @db.Uuid
+  Checkup    Checkup  @relation(fields: [checkupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Medicine   Medicine @relation(fields: [medicineId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("checkupMedicine")
 }
 
 model DiagnosisSymptoms {
-  id        String @id @default(uuid())
-  diagnosis String
-  symptom   String
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  diagnosis String @db.VarChar
+  symptom   String @db.VarChar
 
   @@map("diagnosis_symptoms")
 }
 
 model Hospitals {
-  id   String @id @default(uuid())
-  name String
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @db.VarChar
 
   @@map("hospitals")
 }
 
-model Procedure {
-  id                      String    @unique
-  patientEmail            String
-  patientName             String
-  inTime                  DateTime
-  procedureRecord         String
-  patientConditionBefore  String
-  referredHospital        String
-  outTime                 DateTime?
-
-  @@map("procedures")
+model OpdCounter {
+  id    String @id @db.VarChar
+  date  String @db.VarChar
+  count Int
 }
 
-model OpdCounter {
-  id    String @id
-  date  String
-  count Int
+model VisitingSpecialist {
+  id             String   @id @default(uuid())
+  name           String
+  specialization String
+  availableTime  String
+  availableDays  String[]
+  contactNumber  String
+  email          String?
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("VisitingSpecialist")
+}
+
+model Procedure {
+  id                     String    @id @db.Uuid
+  patientemail           String
+  patientname            String
+  intime                 DateTime  @db.Timestamptz(6)
+  procedurerecord        String
+  patientconditionbefore String
+  referredhospital       String
+  outtime                DateTime? @db.Timestamptz(6)
+
+  @@map("procedure")
+}
+
+model verification {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String   @unique @db.VarChar
+  otp        String   @db.VarChar
+  expiryTime DateTime @db.Timestamp(6)
 }
 
 enum Status {

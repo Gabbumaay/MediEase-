@@ -14,7 +14,7 @@ const GridLoadingScreen = ({ message, loaderColor, messageColor }) => {
                 className="loader"
                 size={20}
             />
-            <p className="gridLoadingText" style={{ color: messageColor }}>{message || "Loading..."}</p> 
+            <p className="gridLoadingText" style={{ color: messageColor }}>{message || "Fetching the data..."}</p> 
         </div>
     </>
   )

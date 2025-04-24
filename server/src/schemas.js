@@ -135,6 +135,20 @@ const patientSchema = Joi.object({
   //   Checkup: Joi.array().items(Joi.object()),
 });
 
+
+const specialistSchema = Joi.object({
+  name: Joi.string().required().min(3).max(30),
+  specialization: Joi.string().required(),  // changed from speciality
+  availableTime: Joi.string().required(),   // added
+  availableDays: Joi.array().items(Joi.string()).required(), // added
+  contactNumber: Joi.string().length(10).pattern(/^[0-9]+$/).required(), // changed from mobileNumber
+  email: Joi.string().email().allow(null).allow('').optional(),
+  status: Joi.string().default("ACTIVE").optional()
+  // No need to validate id, createdAt or updatedAt as they're handled by Prisma
+});
+
+
+
 const checkupMedicinesSchema = Joi.object({
   medicineId: Joi.string().required(),
   dosage: Joi.string().allow(null).allow('').optional(),
@@ -193,6 +207,7 @@ module.exports = {
   categorySchema,
   purchaseSchema,
   patientSchema,
+  specialistSchema,
   checkupSchema,
   sendOtpSchema,
   verifyOtpSchema,

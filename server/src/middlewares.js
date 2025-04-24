@@ -14,6 +14,7 @@ const {
   userSchema,
   checkupSchema,
   feedbackSchema,
+  specialistSchema, 
 } = require("./schemas");
 
 module.exports.validateMedicine = (req, res, next) => {
@@ -82,6 +83,17 @@ module.exports.validatePatient = (req, res, next) => {
     next();
   }
 };
+
+module.exports.validateSpecialist = (req, res, next) => {
+  const { error } = specialistSchema.validate(req.body);
+  console.log("specialist details");
+  if (error) {
+    const msg = error.details.map((e) => e.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+}
 
 module.exports.validatePurchaseList = (req, res, next) => {
   const { error } = purchaseListSchema.validate(req.body);

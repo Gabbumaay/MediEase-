@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const app = require("./app");
 
 //port
-const port = process.env.PORT;
+const port = process.env.PORT || 4000;
 
 //routes
 const purchaseRoutes = require("./src/routes/purchaseRoutes.js");
@@ -31,6 +31,7 @@ const diagnosisRoutes = require("./src/routes/diagnosisRoutes.js");
 const hospitalRoutes = require("./src/routes/hospitalRoutes.js");
 const patientVitalRoutes = require("./src/routes/patientVitalRoutes.js");
 const procedureRoutes = require("./src/routes/procedureRoutes.js");
+const VisitingSpecialistRoutes = require("./src/routes/VisitingSpecialistRoutes.js");
 
 app.use("/api/otp", otpRoutes);
 app.use("/api/auth", authRoutes);
@@ -53,6 +54,7 @@ app.use("/api/diagnosis",diagnosisRoutes);
 app.use("/api/hospitals", hospitalRoutes);
 app.use("/api/patient_vitals", patientVitalRoutes);
 app.use("/api/procedure", procedureRoutes);
+app.use("/api/VisitingSpecialist", VisitingSpecialistRoutes);
 
 app.all("*", (req, res) => {
   throw new ExpressError("Page Not Found", 404);

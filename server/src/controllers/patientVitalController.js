@@ -1,9 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
 const formatTimeFromISO = require('../utils/formatTimeFromISO');
 const { DateTime } = require('luxon');
+const { v4: uuidv4 } = require('uuid');
 
 const prisma = new PrismaClient();
-
 
 const getPatientVitalsList = async (req, res) => {
     try {
@@ -21,12 +21,12 @@ const getPatientVitalsList = async (req, res) => {
         });
 
         if (vitalsList.length === 0) {
-            return res.status(404).json({ message: `No vitals found for this patient: ${patientId}` });
+            return res.status(404).json({ message: `No vitals found` });
         }
 
         const restructuredVitalsList = vitalsList.map((vitals) => ({
             id: vitals?.id,
-            opd: vitals?.id,
+            opd: vitals?.opdNumber || vitals?.id,
             patientName: vitals.Patient?.name,
             date: vitals.date?.toISOString().split("T")[0],
             time: formatTimeFromISO(vitals.date),
@@ -44,7 +44,7 @@ const getPatientVitalsList = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching patient vitals:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }
 
@@ -78,7 +78,7 @@ const getPatientVitals = async (req, res) => {
         const vitals = vitalsList[0];
         const results = {
             id: vitals?.id,
-            opd: vitals?.id,
+            opd: vitals?.opdNumber || vitals?.id,
             patientId: vitals?.Patient?.id,
             patientName: vitals?.Patient?.name,
             email: vitals?.Patient?.email,
@@ -95,7 +95,7 @@ const getPatientVitals = async (req, res) => {
         res.status(200).json(results);
     } catch (error) {
         console.error("Error fetching patient vitals:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
@@ -125,10 +125,9 @@ const deletePatientVitals = async (req, res) => {
         }
     } 
     catch(error){
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 }
-
 
 const savePatientVitals = async (req, res) => {
     try {
@@ -178,18 +177,18 @@ const savePatientVitals = async (req, res) => {
         console.log(`formattedDate: ${formattedDate}`);
         console.log("dbDate", dbDate);
     
-        const lastOpd = await prisma.opdCounter.findMany()
+        const lastOpd = await prisma.opdCounter.findMany();
     
         let newCount;
-        if(lastOpd.length>0){
+        if(lastOpd.length > 0){
             const lastDate = DateTime.fromISO(lastOpd[0].date, { zone: 'Asia/Kolkata' });
             const lastFormattedDate = lastDate.toFormat('yyyyLLdd');
     
             const lastCount = lastOpd[0].count;
             const counterId = lastOpd[0].id;
-            // console.log("equal formatting: ",lastFormattedDate, formattedDate, visitDate, visitDate.toISOString().split('T')[0]);
+            
             if(lastFormattedDate === formattedDate){
-                newCount = lastCount+1;
+                newCount = lastCount + 1;
             }
             else{
                 newCount = 1;
@@ -201,7 +200,7 @@ const savePatientVitals = async (req, res) => {
                     date: dbDate,
                     count: newCount,
                 }
-            })
+            });
         }
         else{
             newCount = 1;
@@ -212,32 +211,21 @@ const savePatientVitals = async (req, res) => {
                     date: dbDate,
                     count: newCount
                 }
-            })
+            });
         }
     
-            const opdId = `OPD${formattedDate}-${newCount.toString().padStart(3, '0')}`;
-            console.log(`Generated OPD ID: ${opdId}`);   
-
+        const opdId = `OPD${formattedDate}-${newCount.toString().padStart(3, '0')}`;
+        console.log(`Generated OPD ID: ${opdId}`);   
 
         let vitals = null;
         const timeInfo = 'T' + DateTime.now().setZone('Asia/Kolkata').toISOTime({ suppressMilliseconds: true });
-        console.log("id: ",id);
+        console.log("id: ", id);
+        
         if(id){
+            // Update existing record
             vitals = await prisma.patientVitals.update({
                 where: {id},
-                data: { id,
-                        patientId,
-                        temperature: parseFloat(temperature),
-                        date: date + timeInfo, 
-                        bloodPressure, 
-                        pulseRate: parseInt(pulseRate),
-                        spO2: parseFloat(spO2),
-                    }
-            });
-            await prisma.checkup.update({
-                where: {id},
-                data:{
-                    id,
+                data: {
                     patientId,
                     temperature: parseFloat(temperature),
                     date: date + timeInfo, 
@@ -245,27 +233,57 @@ const savePatientVitals = async (req, res) => {
                     pulseRate: parseInt(pulseRate),
                     spO2: parseFloat(spO2),
                 }
-            })
+            });
+            
+            // Check if checkup record exists before updating
+            try {
+                const checkupExists = await prisma.checkup.findUnique({
+                    where: { id }
+                });
+                
+                if (checkupExists) {
+                    await prisma.checkup.update({
+                        where: {id},
+                        data:{
+                            patientId,
+                            temperature: parseFloat(temperature),
+                            date: date + timeInfo, 
+                            bloodPressure, 
+                            pulseRate: parseInt(pulseRate),
+                            spO2: parseFloat(spO2),
+                        }
+                    });
+                }
+            } catch (checkupError) {
+                console.log("Checkup record not found or couldn't be updated:", checkupError.message);
+                // Continue execution - don't fail if just the checkup update fails
+            }
+            
             res.status(201).json({ message: "Patient vitals updated successfully", vitals, id});
         }
         else{
+            // Create new record with UUID since the database expects a UUID
+            const newId = uuidv4();
+            
             vitals = await prisma.patientVitals.create({
-                data: { id: opdId,
-                        patientId,
-                        temperature: parseFloat(temperature),
-                        date: jsDate, 
-                        bloodPressure, 
-                        pulseRate: parseInt(pulseRate),
-                        spO2: parseFloat(spO2),
-                    }
+                data: { 
+                    id: newId,
+                    opdNumber: opdId,  // Store OPD ID as a separate field
+                    patientId,
+                    temperature: parseFloat(temperature),
+                    date: jsDate, 
+                    bloodPressure, 
+                    pulseRate: parseInt(pulseRate),
+                    spO2: parseFloat(spO2),
+                }
             });
-            res.status(201).json({ message: "Patient vitals saved successfully", vitals , id });
+            
+            res.status(201).json({ message: "Patient vitals saved successfully", vitals, id: newId });
         }
     } catch (error) {
         console.error("Error saving patient vitals:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
-
 
 module.exports = { getPatientVitals, savePatientVitals, getPatientVitalsList, deletePatientVitals};

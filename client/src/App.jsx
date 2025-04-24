@@ -54,6 +54,9 @@ import AddProcedure from "./pages/AddProcedure";
 import Procedure from "./pages/procedure";
 import UpdateProcedureComponent from "./pages/UpdateProcedure";
 import ProcedureDetail from "./pages/ProcedureDetail";
+import VisitingSpecialist from "./pages/VisitingSpecialist.jsx";
+
+//import UpdateVisitingSpecialist from "./pages/UpdateVisitingSpecialist.jsx";
 
 function App() {
   const { userRole } = useAuthContext();
@@ -329,6 +332,18 @@ function App() {
               <UpdatePurchase />
             </ProtectedRoute>
           } />
+          <Route path="/visiting-specialist" element={
+            <ProtectedRoute routeName="VISITING_SPECIALIST_LIST">
+              <VisitingSpecialist />
+            </ProtectedRoute>
+          } />
+
+
+          {/* <Route path="/visiting-specialist/update/:id" element={
+            <ProtectedRoute routeName="UPDATE_STAFF">
+              <UpdateVisitingSpecialist />
+            </ProtectedRoute>
+          } /> */}
           <Route path="/prescription/update/:id" element={
             <ProtectedRoute routeName="ADD_PRESCRIPTION">
               <UpdatePrescription />

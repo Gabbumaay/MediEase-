@@ -54,7 +54,8 @@ const HomeLayout = ({ children }) => {
     } else if (userRole === "DOCTOR") {
       navigate("/doctordashboard");
     } else if (userRole === "PATIENT") {
-      navigate("/schedule/doctor");
+      // navigate("/schedule/doctor");
+      navigate("/patientdashboard");
     } else {
       navigate("/");
     }
