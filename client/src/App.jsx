@@ -55,6 +55,9 @@ import Procedure from "./pages/procedure";
 import UpdateProcedureComponent from "./pages/UpdateProcedure";
 import ProcedureDetail from "./pages/ProcedureDetail";
 import VisitingSpecialist from "./pages/VisitingSpecialist.jsx";
+import AddHospitalForm from "./pages/AddHospital";
+ import HospitalList from "./pages/HospitalList";
+ import UpdateHospitalForm from "./pages/UpdateHospital";
 
 //import UpdateVisitingSpecialist from "./pages/UpdateVisitingSpecialist.jsx";
 
@@ -78,6 +81,21 @@ function App() {
               <PatientProfile />
             </ProtectedRoute>
           } /> */}
+           <Route path="/hospital/add" element={
+             <ProtectedRoute routeName="ADD_HOSPITAL">
+               <AddHospitalForm />
+             </ProtectedRoute>
+           } />
+           <Route path="/hospitals" element={
+             <ProtectedRoute routeName="HOSPITAL_LIST">
+               <HospitalList />
+             </ProtectedRoute>
+           } />
+           <Route path="/Hospital/update/:id" element={
+             <ProtectedRoute routeName="UPDATE_HOSPITAL">
+               <UpdateHospitalForm />
+             </ProtectedRoute>
+           } />
 
           <Route path="/profile/staff" element={
             <ProtectedRoute routeName="STAFF_PROFILE">

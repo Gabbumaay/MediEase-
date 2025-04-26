@@ -109,6 +109,10 @@ const roleMapping = new Map([
 
     // hospital routes
     ["GET_HOSPITAL_LIST", ["D","PM"]],
+    ["GET_HOSPITAL_LIST", ["D","PM","A"]],
+    ["ADD_HOSPITAL", ["D","PM","A"]],
+    ["UPDATE_HOSPITAL", ["D","PM","A"]],
+    ["DELETE_HOSPITAL", ["D","PM","A"]],
 
     // patient vital routes
     ["GET_PATIENT_VITAL_LIST", ["D","PM"]],
